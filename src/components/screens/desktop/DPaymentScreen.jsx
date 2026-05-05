@@ -70,9 +70,33 @@ function DPaymentScreen() {
             </div>
           </div>
         </section>
-        <aside className="border-2 space-y-4">
-          <div>กล่องสรุปคำสั่งซื้อ</div>
-          <div>กล่องคิวอาร์โค้ด</div>
+        <aside className="border-2 space-y-4 p-4">
+          {/* กล่องสรุปคำสั่งซื้อ */}
+          <div className="border-2 rounded-lg p-4 bg-[#EDEAE3] space-y-2">
+            <h3 className="font-bold">สรุปคำสั่งซื้อ</h3>
+            <div className="flex justify-between">
+              <p>สินค้า</p>
+              <p>฿500</p>
+            </div>
+            <div className="flex justify-between">
+              <p>ค่าจัดส่ง</p>
+              <p>฿50</p>
+            </div>
+            <hr />
+            <div className="flex justify-between font-bold">
+              <p>รวมทั้งหมด</p>
+              <p>฿550</p>
+            </div>
+          </div>
+
+          {/* กล่องคิวอาร์โค้ด */}
+          <div className="border-2 rounded-lg p-4 bg-[#EDEAE3] space-y-2 flex flex-col items-center">
+            <h3 className="font-bold">QR Code</h3>
+            <div className="w-32 h-32 bg-white border-2 flex items-center justify-center">
+              <p className="text-gray-400 text-sm">QR Code</p>
+            </div>
+            <p className="text-sm text-gray-500">สแกนเพื่อชำระเงิน</p>
+          </div>
         </aside>
       </div>
     </main>
