@@ -1,7 +1,4 @@
-const cartItems = [
-  { id: 1, name: 'อกไก่ปั่น ข้าวกล้อง', note: 'ไม่เผ็ด', qty: 2, price: 178 },
-  { id: 2, name: 'Green Protein Smoothie', note: 'ไม่มีน้ำตาล', qty: 1, price: 79 },
-]
+import { cartItems } from '@/data/cart'
 
 const timeSlots = [
   { label: 'เร็วที่สุด', sub: '~45 นาที', active: true },

@@ -1,105 +1,190 @@
 import { useState } from "react";
+import { cartItems, SHIPPING_FEE } from "@/data/cart";
 
 function DPaymentScreen() {
   const [selectedMethod, setSelectedMethod] = useState("card");
+  const [formData, setFormData] = useState({ cardNumber: "", expiry: "", cvv: "", name: "" });
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const total = subtotal + SHIPPING_FEE;
+
+  const methods = [
+    { id: "card", label: "บัตรเครดิต/เดบิต" },
+    { id: "q", label: "QR/PromptPay" },
+    { id: "cod", label: "เก็บเงินปลายทาง" },
+    { id: "wallet", label: "TrueMoney Wallet" },
+  ];
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  }
+
+  function validate() {
+    if (selectedMethod !== "card") return {};
+    const newErrors = {};
+    if (!formData.cardNumber.trim()) newErrors.cardNumber = "กรุณากรอกเลขบัตร";
+    if (!formData.expiry.trim()) newErrors.expiry = "กรุณากรอกวันหมดอายุ";
+    if (!formData.cvv.trim()) newErrors.cvv = "กรุณากรอก CVV";
+    if (!formData.name.trim()) newErrors.name = "กรุณากรอกชื่อบนบัตร";
+    return newErrors;
+  }
+
+  function handleSubmit() {
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setSubmitted(true);
+  }
+
+  if (submitted) {
+    return (
+      <main className="p-6 flex items-center justify-center min-h-100">
+        <div className="text-center space-y-3">
+          <div className="text-5xl">✅</div>
+          <h2 className="text-xl font-bold" style={{ color: "#3A6439" }}>ชำระเงินสำเร็จ</h2>
+          <p style={{ color: "#8A8780" }}>คำสั่งซื้อของคุณได้รับการยืนยันแล้ว</p>
+          <button
+            onClick={() => setSubmitted(false)}
+            className="mt-4 px-6 py-2 rounded-lg text-white"
+            style={{ backgroundColor: "#5B8C5A" }}
+          >
+            กลับหน้าหลัก
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="p-6">
-      <div className="grid grid-cols-[3fr_1fr] gap-10 ">
-        <section className="border-2 space-y-4">
-          <h2>เลือกวิธีชำระเงิน</h2>
-          <p>ตอนนี้เลือก: {selectedMethod}</p>
+      <div className="grid grid-cols-[3fr_1fr] gap-10">
+        <section className="border-2 space-y-4 p-4">
+          <h2 className="font-bold text-lg">เลือกวิธีชำระเงิน</h2>
 
           <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setSelectedMethod("card")}
-              className={
-                selectedMethod === "card"
-                  ? "bg-[#E8F0E8] border-2 border-[#A3B899] rounded-lg p-4 w-full"
-                  : "bg-[#EDEAE3] rounded-lg p-4 w-full"
-              }
-            >
-              <p>บัตรเครดิต/เดบิต</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedMethod("q")}
-              className={
-                selectedMethod === "q"
-                  ? "bg-[#E8F0E8] border-2 border-[#A3B899] rounded-lg p-4 w-full"
-                  : "bg-[#EDEAE3] rounded-lg p-4 w-full"
-              }
-            >
-              <p>QR/PrompPay</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedMethod("cod")}
-              className={
-                selectedMethod === "cod"
-                  ? "bg-[#E8F0E8] border-2 border-[#A3B899] rounded-lg p-4 w-full"
-                  : "bg-[#EDEAE3] rounded-lg p-4 w-full"
-              }
-            >
-              <p>เก็บเงินปลายทาง</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedMethod("wallet")}
-              className={
-                selectedMethod === "wallet"
-                  ? "bg-[#E8F0E8] border-2 border-[#A3B899] rounded-lg p-4 w-full"
-                  : "bg-[#EDEAE3] rounded-lg p-4 w-full"
-              }
-            >
-              <p>TrueMoney Wallet</p>
-            </button>
+            {methods.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setSelectedMethod(m.id)}
+                className="rounded-lg p-4 w-full border-2 transition-colors"
+                style={{
+                  backgroundColor: selectedMethod === m.id ? "#EAF2EA" : "#EDEAE3",
+                  borderColor: selectedMethod === m.id ? "#5B8C5A" : "transparent",
+                }}
+              >
+                {m.label}
+              </button>
+            ))}
           </div>
-          <div className="w-full border-2 bg-[#EDEAE3] rounded-lg p-4 grid gap-2 ">
-            <h3>ข้อมูลบัตร</h3>
-            <div className="grid grid-cols-1 w-full bg-white">
-              <input placeholder="💳เลขบัตร" />
-            </div>
 
-            <div className="grid grid-cols-2 w-full  gap-x-2 ">
-              <input className="bg-white" placeholder="📅MM/YY" />
-              <input className="bg-white" placeholder="🔒CVV" />
+          {selectedMethod === "card" && (
+            <div className="rounded-lg p-4 grid gap-3" style={{ backgroundColor: "#EDEAE3" }}>
+              <h3 className="font-semibold">ข้อมูลบัตร</h3>
+
+              <div>
+                <input
+                  name="cardNumber"
+                  value={formData.cardNumber}
+                  onChange={handleChange}
+                  placeholder="💳 เลขบัตร"
+                  className="w-full bg-white px-3 py-2 rounded border"
+                />
+                {errors.cardNumber && <p className="text-sm mt-1" style={{ color: "#D95B5B" }}>{errors.cardNumber}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <input
+                    name="expiry"
+                    value={formData.expiry}
+                    onChange={handleChange}
+                    placeholder="📅 MM/YY"
+                    className="w-full bg-white px-3 py-2 rounded border"
+                  />
+                  {errors.expiry && <p className="text-sm mt-1" style={{ color: "#D95B5B" }}>{errors.expiry}</p>}
+                </div>
+                <div>
+                  <input
+                    name="cvv"
+                    value={formData.cvv}
+                    onChange={handleChange}
+                    placeholder="🔒 CVV"
+                    className="w-full bg-white px-3 py-2 rounded border"
+                  />
+                  {errors.cvv && <p className="text-sm mt-1" style={{ color: "#D95B5B" }}>{errors.cvv}</p>}
+                </div>
+              </div>
+
+              <div>
+                <input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="🤵 ชื่อบนบัตร"
+                  className="w-full bg-white px-3 py-2 rounded border"
+                />
+                {errors.name && <p className="text-sm mt-1" style={{ color: "#D95B5B" }}>{errors.name}</p>}
+              </div>
             </div>
-            <div className="grid grid-cols-1 w-full bg-white">
-              <input placeholder=" 🤵ชื่อบนบัตร" />
+          )}
+
+          {selectedMethod === "q" && (
+            <div className="rounded-lg p-6 flex flex-col items-center gap-3" style={{ backgroundColor: "#EDEAE3" }}>
+              <h3 className="font-semibold">สแกน QR เพื่อชำระเงิน</h3>
+              <div className="w-40 h-40 bg-white border-2 flex items-center justify-center rounded">
+                <p style={{ color: "#8A8780" }} className="text-sm">QR Code</p>
+              </div>
+              <p className="text-sm" style={{ color: "#8A8780" }}>PromptPay: 098-765-4321</p>
             </div>
-          </div>
+          )}
+
+          {(selectedMethod === "cod" || selectedMethod === "wallet") && (
+            <div className="rounded-lg p-4" style={{ backgroundColor: "#EDEAE3" }}>
+              <p style={{ color: "#8A8780" }}>
+                {selectedMethod === "cod"
+                  ? "ชำระเงินเมื่อได้รับสินค้า — ไม่ต้องกรอกข้อมูลเพิ่มเติม"
+                  : "ระบบจะส่ง link ไปยัง TrueMoney Wallet ของคุณหลังยืนยัน"}
+              </p>
+            </div>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            className="w-full py-3 rounded-lg text-white font-semibold"
+            style={{ backgroundColor: "#5B8C5A" }}
+          >
+            ยืนยันชำระเงิน ฿{total}
+          </button>
         </section>
-        <aside className="border-2 space-y-4 p-4">
-          {/* กล่องสรุปคำสั่งซื้อ */}
-          <div className="border-2 rounded-lg p-4 bg-[#EDEAE3] space-y-2">
+
+        <aside className="space-y-4">
+          <div className="border-2 rounded-lg p-4 space-y-2" style={{ backgroundColor: "#EDEAE3" }}>
             <h3 className="font-bold">สรุปคำสั่งซื้อ</h3>
             <div className="flex justify-between">
               <p>สินค้า</p>
-              <p>฿500</p>
+              <p>฿{subtotal}</p>
             </div>
             <div className="flex justify-between">
               <p>ค่าจัดส่ง</p>
-              <p>฿50</p>
+              <p>฿{SHIPPING_FEE}</p>
             </div>
             <hr />
             <div className="flex justify-between font-bold">
               <p>รวมทั้งหมด</p>
-              <p>฿550</p>
+              <p>฿{total}</p>
             </div>
-          </div>
-
-          {/* กล่องคิวอาร์โค้ด */}
-          <div className="border-2 rounded-lg p-4 bg-[#EDEAE3] space-y-2 flex flex-col items-center">
-            <h3 className="font-bold">QR Code</h3>
-            <div className="w-32 h-32 bg-white border-2 flex items-center justify-center">
-              <p className="text-gray-400 text-sm">QR Code</p>
-            </div>
-            <p className="text-sm text-gray-500">สแกนเพื่อชำระเงิน</p>
           </div>
         </aside>
       </div>
     </main>
   );
 }
+
 export default DPaymentScreen;
