@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { categories, products } from '@/data/products'
+import { useCart } from '@/context/CartContext'
 
 const DCatalogScreen = () => {
     const navigate = useNavigate()
+    const { addItem } = useCart()
     const [searchParams] = useSearchParams()
     const searchQuery = searchParams.get('q') || ''
     const [selectedCategory, setSelectedCategory] = useState(0)
@@ -119,9 +121,7 @@ const DCatalogScreen = () => {
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation()
-                                            alert(
-                                                `เพิ่ม ${item.name} ลงตะกร้าเรียบร้อย`,
-                                            )
+                                            addItem(item)
                                         }}
                                         className="bg-[#5c8254] hover:bg-[#4a6b43] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-transform active:scale-95 shadow-md shadow-green-900/10"
                                     >

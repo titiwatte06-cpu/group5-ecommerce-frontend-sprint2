@@ -25,8 +25,18 @@ export function CartProvider({ children }) {
     setItems((prev) => prev.filter((item) => item.id !== id))
   }
 
+  function addItem(product) {
+    setItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id)
+      if (existing) {
+        return prev.map((item) => item.id === product.id ? { ...item, qty: item.qty + 1 } : item)
+      }
+      return [...prev, { id: product.id, name: product.name, note: '', qty: 1, price: product.price }]
+    })
+  }
+
   return (
-    <CartContext.Provider value={{ items, subtotal, total, incrementQty, decrementQty, removeItem }}>
+    <CartContext.Provider value={{ items, subtotal, total, incrementQty, decrementQty, removeItem, addItem }}>
       {children}
     </CartContext.Provider>
   )
