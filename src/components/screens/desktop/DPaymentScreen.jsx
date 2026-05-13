@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCart } from "@/context/useCart";
+import { SHIPPING_FEE } from "@/data/cart";
 
 function DPaymentScreen() {
   const { subtotal, total } = useCart();
