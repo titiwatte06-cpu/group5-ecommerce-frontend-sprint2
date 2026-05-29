@@ -1,6 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useContext } from "react";
-import { fetchApi } from "../utils/api";
 import { login, logout } from "../services/auth";
+import { getMe } from "../services/user";
 
 const AuthContext = createContext();
 
@@ -11,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const checkUser = async () => {
             try {
-                const userData = await fetchApi("/users/me"); // fetch
+                const userData = await getMe();
                 setUser(userData);
             } catch {
                 setUser(null); // not login || cookie expired
@@ -23,24 +24,29 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const handleLogin = async (email, password) => {
-        const data = await login(email, password);
-        setUser(data.user); // state update
+        await login(email, password);
+
+        const userData = await getMe();
+        setUser(userData);
     };
 
     const handleLogout = async () => {
-        await logout();
-        setUser(null);
+        try {
+            await logout();
+        } finally {
+            setUser(null);
+        }
     };
 
     return (
         <AuthContext.Provider
             value={{ user, loading, handleLogin, handleLogout }}
         >
-            {children}
+            {!loading && children}
         </AuthContext.Provider>
     );
 };
-// eslint-disable-next-line react-refresh/only-export-components
+
 export const useAuth = () => {
     return useContext(AuthContext);
 };
