@@ -1,19 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 
 import { getProductById } from '@/services/product'
 
 const DProductDetailScreen = () => {
-    const { id } = useParams() // รับค่า ID จาก URL เช่น /product/18
+    const { id } = useParams()
     const navigate = useNavigate()
-
+    const [product, setProduct] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
     const [quantity, setQuantity] = useState(1)
     const [spicyLevel, setSpicyLevel] = useState('ไม่เผ็ด')
 
-    const product = products.find((p) => p.id === parseInt(id))
+    useEffect(() => {
+        setLoading(true)
+        getProductById(id)
+            .then((res) => {
+                setProduct(res.data)
+                setLoading(false)
+            })
+            .catch(() => {
+                setError(true)
+                setLoading(false)
+            })
+    }, [id])
 
-    // กรณีไม่พบสินค้า (เช่น ใส่ ID ที่ไม่มีในระบบ)
-    if (!product)
+    if (loading)
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#F8F6F2]">
+                <p className="text-gray-400 font-bold">กำลังโหลด...</p>
+            </div>
+        )
+
+    if (error || !product)
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8F6F2]">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -29,18 +48,10 @@ const DProductDetailScreen = () => {
         )
 
     const nutrition = [
-        { label: 'แคลอรี่', value: product.kcal, unit: 'kcal' },
-        { label: 'โปรตีน', value: product.p.replace('g', ''), unit: 'g' },
-        {
-            label: 'คาร์บ',
-            value: product.carbs ? product.carbs.replace('g', '') : '30',
-            unit: 'g',
-        },
-        {
-            label: 'ไขมัน',
-            value: product.fat ? product.fat.replace('g', '') : '8',
-            unit: 'g',
-        },
+        { label: 'แคลอรี่', value: product.kcal ?? '-', unit: 'kcal' },
+        { label: 'โปรตีน', value: product.protein?.replace('g', '') ?? '-', unit: 'g' },
+        { label: 'คาร์บ', value: product.carbs?.replace('g', '') ?? '-', unit: 'g' },
+        { label: 'ไขมัน', value: product.fat?.replace('g', '') ?? '-', unit: 'g' },
     ]
 
     const spicyOptions = ['ไม่เผ็ด', 'เผ็ดน้อย', 'เผ็ดปานกลาง', 'เผ็ดมาก']
@@ -57,18 +68,24 @@ const DProductDetailScreen = () => {
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 {/* Left: Image Gallery */}
                 <div className="max-w-500px w-full mx-auto lg:mx-0 space-y-4">
-                    <div
-                        className={`aspect-square ${product.color} rounded-32px flex items-center justify-center border border-gray-100 shadow-sm`}
-                    >
-                        <span className="text-gray-400 text-sm italic text-center px-4">
-                            📷 รูปอาหาร – {product.name}
-                        </span>
+                    <div className="aspect-square bg-[#ebeae4] rounded-[32px] flex items-center justify-center border border-gray-100 shadow-sm overflow-hidden">
+                        {product.imageUrl ? (
+                            <img
+                                src={product.imageUrl}
+                                alt={product.productname}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <span className="text-gray-400 text-sm italic text-center px-4">
+                                📷 รูปอาหาร – {product.productname}
+                            </span>
+                        )}
                     </div>
                     <div className="grid grid-cols-4 gap-4 text-center">
                         {[1, 2, 3, 4].map((i) => (
                             <div
                                 key={i}
-                                className={`aspect-square ${product.color} opacity-50 rounded-2xl border border-gray-100 cursor-pointer hover:ring-2 hover:ring-green-500 transition-all`}
+                                className="aspect-square bg-[#ebeae4] opacity-50 rounded-2xl border border-gray-100 cursor-pointer hover:ring-2 hover:ring-green-500 transition-all"
                             ></div>
                         ))}
                     </div>
@@ -86,7 +103,7 @@ const DProductDetailScreen = () => {
                     </div>
 
                     <h1 className="text-3xl font-black text-gray-800 mb-2">
-                        {product.name}
+                        {product.productname}
                     </h1>
                     <p className="text-2xl font-black text-[#5c8254] mb-6">
                         ฿{product.price}
