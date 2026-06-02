@@ -52,6 +52,8 @@ export const products = [
         desc: 'มัทฉะเกรดพรีเมียมหอมละมุน ช่วยต้านอนุมูลอิสระและเสริมสร้างกล้ามเนื้อ',
     },
 
+
+
     // Category 2: สลัด & Bowl
     {
         id: 5,
@@ -94,6 +96,8 @@ export const products = [
         desc: 'ซีซาร์สลัดไก่ย่าง ผักกาดคอสสดกรอบ ขนมปังกรอบ และชีสคุณภาพดี',
     },
 
+
+   
     // Category 3: Smoothie
     {
         id: 9,
@@ -138,7 +142,8 @@ export const products = [
         desc: 'ผักใบเขียวรวมปั่นกับแอปเปิ้ลเขียวและโปรตีนพืช บำรุงระบบขับถ่าย',
     },
 
-    // Category 4: Meal Plan (🍱)
+    // Category 4: Meal Plan ()
+    
     {
         id: 13,
         categoryId: 4,
@@ -181,7 +186,8 @@ export const products = [
         desc: 'ชุดอาหารมังสวิรัติเพื่อสุขภาพ ไร้เนื้อสัตว์แต่โปรตีนถึงใจ',
     },
 
-    // Category 5: Supplement (💊)
+    // Category 5: Supplement ()
+    
     {
         id: 17,
         categoryId: 5,
@@ -193,6 +199,7 @@ export const products = [
         color: 'bg-[#f0f0f5]',
         desc: 'เวย์โปรตีนไอโซเลทเกรดนำเข้า ดูดซึมเร็ว ไขมันและน้ำตาล 0%',
     },
+
     {
         id: 18,
         categoryId: 5,
@@ -222,5 +229,131 @@ export const products = [
         p: '0g',
         color: 'bg-[#fffbe6]',
         desc: 'น้ำมันปลาเข้มข้น บำรุงสมอง หัวใจ และลดการอักเสบของกล้ามเนื้อ',
+    }, 
+
+    {
+    id: 21,
+    categoryId: 4,
+    name: 'Lean Muscle Plan',
+    price: 390,
+    kcal: 2000,
+    p: '140g',
+    tag: 'High Protein',
+    color: 'bg-[#eef3f1]',
+    desc: 'ชุดอาหารโปรตีนสูง ไขมันต่ำ เหมาะสำหรับสร้างกล้ามเนื้อแบบ Lean และคุมแคลอรี่',
     },
+
+    {
+    id: 22,
+    categoryId: 5,
+    name: 'Whey Protein Vanilla',
+    price: 1290,
+    kcal: 120,
+    p: '25g',
+    tag: 'Best Seller',
+    color: 'bg-[#f5f1ea]',
+    desc: 'เวย์โปรตีนรสวนิลลา กลิ่นหอมละมุน ดื่มง่าย โปรตีนสูง ไขมันต่ำ'
+    },
+    {
+        id: 23,
+        categoryId: 5,
+        name: 'Whey Protein Strawberry',
+        price: 1290,
+        kcal: 125,
+        p: '25g',
+        tag: 'Popular',
+        color: 'bg-[#ffe5ec]',
+        desc: 'เวย์โปรตีนรสสตรอว์เบอร์รี่ หวานหอมสดชื่น โปรตีนสูง ดื่มง่าย'
+    },
+    {
+        id: 24,
+        categoryId: 5,
+        name: 'Whey Protein Orange',
+        price: 1290,
+        kcal: 118,
+        p: '24g',
+        tag: 'Fresh',
+        color: 'bg-[#fff1dc]',
+        desc: 'เวย์โปรตีนรสส้ม สดชื่น ดื่มง่าย ให้โปรตีนเต็มๆ หลังออกกำลังกาย'
+    },
+    {
+        id: 25,
+        categoryId: 5,
+        name: 'Whey Protein Matcha',
+        price: 1350,
+        kcal: 130,
+        p: '25g',
+        tag: 'Healthy',
+        color: 'bg-[#e6f4e6]',
+        desc: 'เวย์โปรตีนรสมัทฉะ หอมชาเขียวญี่ปุ่น โปรตีนสูง รสชาติพรีเมียม'
+    },
+    {
+        id: 26,
+        categoryId: 5,
+        name: 'Whey Protein Cookies and Cream',
+        price: 1390,
+        kcal: 140,
+        p: '26g',
+        tag: 'Popular',
+        color: 'bg-[#f2f2f2]',
+        desc: 'เวย์โปรตีนคุกกี้แอนด์ครีม รสเข้มข้น หอมคุกกี้ ดื่มอร่อยเหมือนของหวาน'
+    },
+    {
+        id: 27,
+        categoryId: 5,
+        name: 'Whey Protein Chocolate',
+        price: 1290,
+        kcal: 135,
+        p: '25g',
+        tag: 'Classic',
+        color: 'bg-[#ede0d4]',
+        desc: 'เวย์โปรตีนรสช็อกโกแลต เข้มข้น ดื่มง่าย โปรตีนสูง เหมาะสำหรับสายฟิตเนส'
+    },
+    {
+        id: 28,
+        categoryId: 5,
+        name: 'Zinc',
+        price: 290,
+        kcal: 0,
+        p: '0g',
+        tag: 'Immune Support',
+        color: 'bg-[#eef2f3]',
+        desc: 'ซิงก์ช่วยเสริมภูมิคุ้มกัน ดูแลผิว ลดสิว และช่วยฟื้นฟูร่างกาย'
+    },
+    {
+        id: 29,
+        categoryId: 5,
+        name: 'Vitamin C',
+        price: 350,
+        kcal: 5,
+        p: '0g',
+        tag: 'Vitamin',
+        color: 'bg-[#fff4cc]',
+        desc: 'วิตามินซีช่วยเสริมภูมิคุ้มกัน ต้านอนุมูลอิสระ และช่วยให้ผิวกระจ่างใส'
+    },
+    {
+        id: 30,
+        categoryId: 5,
+        name: 'Vitamin D',
+        price: 390,
+        kcal: 0,
+        p: '0g',
+        tag: 'Bone Health',
+        color: 'bg-[#fff8e7]',
+        desc: 'วิตามินดีช่วยเสริมกระดูกและภูมิคุ้มกัน เหมาะสำหรับคนที่โดนแดดน้อย'
+    },
+    {
+        id: 31,
+        categoryId: 5,
+        name: 'Magnesium',
+        price: 420,
+        kcal: 0,
+        p: '0g',
+        tag: 'Recovery',
+        color: 'bg-[#ececff]',
+        desc: 'แมกนีเซียมช่วยลดอาการล้า คลายกล้ามเนื้อ และช่วยให้นอนหลับสบาย'
+    },
+
+
+    
 ]
