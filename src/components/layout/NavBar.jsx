@@ -144,7 +144,7 @@ const NavBar = () => {
                                         onClick={() => navigate("/admin")}
                                         className="w-full flex items-center gap-2 px-4 py-3 text-[11px] font-bold text-[#5b5750] hover:bg-[#f5f2ea] transition-colors border-b border-[#e5dfd3]"
                                     >
-                                        <User size={14} /> ระบบหลังบ้าน
+                                        <User size={14} /> จัดการร้าน
                                     </button>
                                 )}
                                 <button
