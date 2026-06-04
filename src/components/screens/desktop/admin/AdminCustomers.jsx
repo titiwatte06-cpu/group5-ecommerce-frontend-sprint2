@@ -1,40 +1,80 @@
-import { mockCustomers } from '@/data/adminMockData'
+import { useState, useEffect } from 'react'
+import { getAllUsers } from '@/services/admin'
 
 export default function AdminCustomers() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-[#1C1C1A] mb-6">Customers</h1>
+    const [customers, setCustomers] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#DDD9D0]">
-          <h2 className="text-base font-semibold text-[#1C1C1A]">
-            รายชื่อลูกค้า ({mockCustomers.length})
-          </h2>
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await getAllUsers()
+                const users = (res.data ?? []).filter((u) => u.role === 'user')
+                setCustomers(users)
+            } catch (err) {
+                setError('โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
+
+    return (
+        <div>
+            <h1 className="text-2xl font-bold text-[#1C1C1A] mb-6">Customers</h1>
+
+            {error && (
+                <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+                    {error}
+                </div>
+            )}
+
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-[#DDD9D0]">
+                    <h2 className="text-base font-semibold text-[#1C1C1A]">
+                        รายชื่อลูกค้า {!loading && `(${customers.length})`}
+                    </h2>
+                </div>
+
+                <table className="w-full text-sm">
+                    <thead className="bg-[#F8F6F2] text-[#8A8780]">
+                        <tr>
+                            <th className="text-left px-6 py-3 font-medium">#</th>
+                            <th className="text-left px-6 py-3 font-medium">ชื่อผู้ใช้</th>
+                            <th className="text-left px-6 py-3 font-medium">อีเมล</th>
+                            <th className="text-left px-6 py-3 font-medium">เบอร์โทร</th>
+                            <th className="text-left px-6 py-3 font-medium">สมัครเมื่อ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading ? (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-12 text-center text-sm text-[#8A8780]">
+                                    กำลังโหลด...
+                                </td>
+                            </tr>
+                        ) : customers.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-12 text-center text-sm text-[#8A8780]">
+                                    ยังไม่มีลูกค้า
+                                </td>
+                            </tr>
+                        ) : customers.map((customer, index) => (
+                            <tr key={customer._id} className="border-t border-[#DDD9D0]">
+                                <td className="px-6 py-4 text-[#8A8780]">{index + 1}</td>
+                                <td className="px-6 py-4 text-[#1C1C1A] font-medium">{customer.username}</td>
+                                <td className="px-6 py-4 text-[#8A8780]">{customer.email}</td>
+                                <td className="px-6 py-4 text-[#1C1C1A]">{customer.tel}</td>
+                                <td className="px-6 py-4 text-[#8A8780]">
+                                    {customer.createdAt ? customer.createdAt.slice(0, 10) : '—'}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-        <table className="w-full text-sm">
-          <thead className="bg-[#F8F6F2] text-[#8A8780]">
-            <tr>
-              <th className="text-left px-6 py-3 font-medium">ID</th>
-              <th className="text-left px-6 py-3 font-medium">ชื่อ</th>
-              <th className="text-left px-6 py-3 font-medium">อีเมล</th>
-              <th className="text-left px-6 py-3 font-medium">จำนวนออเดอร์</th>
-              <th className="text-left px-6 py-3 font-medium">ยอดซื้อรวม</th>
-            </tr>
-          </thead>
-          <tbody>
-            {mockCustomers.map((customer) => (
-              <tr key={customer.id} className="border-t border-[#DDD9D0]">
-                <td className="px-6 py-4 font-medium text-[#5B8C5A]">{customer.id}</td>
-                <td className="px-6 py-4 text-[#1C1C1A]">{customer.name}</td>
-                <td className="px-6 py-4 text-[#8A8780]">{customer.email}</td>
-                <td className="px-6 py-4 text-[#1C1C1A]">{customer.orders}</td>
-                <td className="px-6 py-4 text-[#1C1C1A]">฿{customer.totalSpent.toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
+    )
 }

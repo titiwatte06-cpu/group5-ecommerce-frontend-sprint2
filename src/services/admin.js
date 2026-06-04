@@ -8,6 +8,6 @@ export const getAdminOrders = async () => {
     return await fetchApi("/admin/orders");
 };
 
-export const getAdminCustomers = async () => {
-    return await fetchApi("/admin/customers");
+export const getAllUsers = async () => {
+    return await fetchApi("/users");
 };
