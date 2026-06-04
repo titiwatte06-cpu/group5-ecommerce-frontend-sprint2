@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '@/context/useCart'
 import { SHIPPING_FEE } from '@/data/cart'
-import { userAddresses } from '@/data/user'
 import { acceptedPayments } from '@/data/paymentMethods'
+import { getAddresses } from '@/services/user'
 
 const timeSlots = [
   { label: 'เร็วที่สุด', sub: '~45 นาที' },
@@ -16,6 +16,21 @@ export default function DCartCheckoutScreen() {
   const navigate = useNavigate()
   const { items, subtotal, total, incrementQty, decrementQty, removeItem } = useCart()
   const [selectedSlot, setSelectedSlot] = useState(0)
+  const [addresses, setAddresses] = useState([])
+  const [selectedAddressId, setSelectedAddressId] = useState(null)
+  const [addrLoading, setAddrLoading] = useState(true)
+
+  useEffect(() => {
+    getAddresses()
+      .then((res) => {
+        const data = res.data ?? []
+        setAddresses(data)
+        const defaultAddr = data.find((a) => a.isDefault)
+        if (defaultAddr) setSelectedAddressId(defaultAddr._id)
+      })
+      .catch(() => {})
+      .finally(() => setAddrLoading(false))
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#F8F6F2] font-['DM_Sans']">
@@ -82,12 +97,26 @@ export default function DCartCheckoutScreen() {
               <span className="text-[#D95B5B] text-[14px]">📍</span>
               <p className="text-[13px] font-semibold text-[#1C1C1A]">ที่อยู่จัดส่ง</p>
             </div>
-            {userAddresses.map((addr) => (
-              <div key={addr.id} className="bg-[#EDEAE3] rounded-xl border-[1.5px] border-[#5B8C5A] px-4 py-3 mb-3">
-                <p className="text-[12px] font-semibold text-[#1C1C1A]">{addr.label} — {addr.name}</p>
-                <p className="text-[12px] text-[#8A8780] mt-0.5">{addr.address}</p>
-              </div>
-            ))}
+            {addrLoading ? (
+              <p className="text-[12px] text-[#8A8780]">กำลังโหลด...</p>
+            ) : addresses.length === 0 ? (
+              <p className="text-[12px] text-[#8A8780]">ยังไม่มีที่อยู่ กรุณาเพิ่มที่อยู่ก่อน</p>
+            ) : (
+              addresses.map((addr) => (
+                <div
+                  key={addr._id}
+                  onClick={() => setSelectedAddressId(addr._id)}
+                  className={`rounded-xl border-[1.5px] px-4 py-3 mb-3 cursor-pointer transition-colors ${
+                    selectedAddressId === addr._id
+                      ? 'bg-[#EAF2EA] border-[#5B8C5A]'
+                      : 'bg-white border-[#DDD9D0] hover:bg-[#EDEAE3]'
+                  }`}
+                >
+                  <p className="text-[12px] font-semibold text-[#1C1C1A]">{addr.label} — {addr.recieveName}</p>
+                  <p className="text-[12px] text-[#8A8780] mt-0.5">{addr.recieveAddress}</p>
+                </div>
+              ))
+            )}
             <button className="text-[12px] text-[#5B8C5A] hover:underline">
               + เพิ่มที่อยู่ใหม่
             </button>
@@ -159,8 +188,12 @@ export default function DCartCheckoutScreen() {
             </div>
 
             <button
-              onClick={() => navigate('/payment')}
-              className="w-full h-12 rounded-xl bg-[#5B8C5A] text-white text-[14px] font-semibold hover:bg-[#4a7249] transition-colors"
+              onClick={() => {
+                if (!selectedAddressId) return
+                navigate('/payment', { state: { addressId: selectedAddressId } })
+              }}
+              disabled={!selectedAddressId}
+              className="w-full h-12 rounded-xl bg-[#5B8C5A] text-white text-[14px] font-semibold hover:bg-[#4a7249] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ดำเนินการชำระเงิน →
             </button>

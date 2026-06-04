@@ -1,96 +1,80 @@
-import { useState } from "react";
-import { cartItems as initialCart, SHIPPING_FEE } from "@/data/cart";
+import { useState, useEffect } from "react";
 import { CartContext } from "./useCart";
+import { useAuth } from "./AuthContext";
+import {
+    getCart,
+    addCart,
+    updateCartItem,
+    clearCart as clearCartApi,
+} from "@/services/cart";
+
+const SHIPPING_FEE = 30;
+
+// Normalize API cart items → shape the UI expects (qty, _id as productId)
+function normalizeItems(apiItems = []) {
+    return apiItems.map((item) => {
+        const productId = item.productId?._id ?? item.productId;
+        return {
+            ...item,
+            _id: productId,
+            id: productId,
+            qty: item.quantity,
+        };
+    });
+}
 
 export function CartProvider({ children }) {
-    const [items, setItems] = useState(initialCart);
+    const { user, loading: authLoading } = useAuth();
+    const [items, setItems] = useState([]);
+    const [cartLoading, setCartLoading] = useState(false);
 
-    const subtotal = items.reduce(
-        (sum, item) => sum + item.price * item.qty,
-        0,
-    );
+    // Fetch cart when user logs in, clear when logs out
+    useEffect(() => {
+        if (authLoading) return;
+        if (!user) {
+            setItems([]);
+            return;
+        }
+        setCartLoading(true);
+        getCart()
+            .then((res) => setItems(normalizeItems(res.data?.items)))
+            .catch(() => {})
+            .finally(() => setCartLoading(false));
+    }, [user, authLoading]);
+
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
     const total = subtotal + SHIPPING_FEE;
 
-    function incrementQty(id) {
-        setItems((prev) =>
-            prev.map((item) => {
-                const itemId = item._id || item.id;
-
-                if (itemId === id) {
-                    const stock =
-                        item.dbStock !== undefined ? item.dbStock : 99;
-                    if (item.qty + 1 > stock) {
-                        alert(`ขออภัย สามารถสั่งได้สูงสุด ${stock} ชิ้น`);
-                        return item;
-                    }
-                    return { ...item, qty: item.qty + 1 };
-                }
-                return item;
-            }),
-        );
+    async function addItem(product) {
+        const productId = product._id || product.id;
+        const quantity = product.selectedQty || 1;
+        const res = await addCart(productId, quantity);
+        setItems(normalizeItems(res.data?.items));
     }
 
-    function decrementQty(id) {
-        setItems((prev) =>
-            prev
-                .map((item) =>
-                    (item._id || item.id) === id
-                        ? { ...item, qty: item.qty - 1 }
-                        : item,
-                )
-                .filter((item) => item.qty > 0),
-        );
+    async function incrementQty(id) {
+        const item = items.find((i) => (i._id || i.id) === id);
+        if (!item) return;
+        const res = await updateCartItem(id, item.qty + 1);
+        setItems(normalizeItems(res.data?.items));
     }
 
-    function removeItem(id) {
-        setItems((prev) => prev.filter((item) => (item._id || item.id) !== id));
+    async function decrementQty(id) {
+        const item = items.find((i) => (i._id || i.id) === id);
+        if (!item) return;
+        // qty - 1 = 0 → BE removes item (editCartItem handles quantity=0)
+        const res = await updateCartItem(id, item.qty - 1);
+        setItems(normalizeItems(res.data?.items));
     }
 
-    function addItem(product) {
-        setItems((prev) => {
-            const targetId = product._id || product.id;
-            const targetName = product.productname || product.name;
+    async function removeItem(id) {
+        const res = await updateCartItem(id, 0);
+        setItems(normalizeItems(res.data?.items));
+    }
 
-            const amountToAdd = product.selectedQty || 1;
-            const stock = product.dbStock !== undefined ? product.dbStock : 99;
-
-            const existing = prev.find(
-                (item) => (item._id || item.id) === targetId,
-            );
-
-            if (existing) {
-                if (existing.qty + amountToAdd > stock) {
-                    alert(
-                        `รายการสินค้าถูกจอง หรือ ไม่เพียงพอ (สินค้าเหลือ ${stock} ชิ้น)`,
-                    );
-                    return prev;
-                }
-                return prev.map((item) =>
-                    (item._id || item.id) === targetId
-                        ? { ...item, qty: item.qty + amountToAdd }
-                        : item,
-                );
-            }
-
-            if (amountToAdd > stock) {
-                alert(`สินค้าเหลือเพียง ${stock} ชิ้น`);
-                return prev;
-            }
-
-            return [
-                ...prev,
-                {
-                    ...product,
-                    _id: targetId,
-                    id: targetId,
-                    name: targetName,
-                    productname: targetName,
-                    qty: amountToAdd,
-                    price: product.price,
-                    dbStock: stock,
-                },
-            ];
-        });
+    async function clearCart() {
+        await clearCartApi();
+        setItems([]);
     }
 
     return (
@@ -99,10 +83,12 @@ export function CartProvider({ children }) {
                 items,
                 subtotal,
                 total,
+                cartLoading,
+                addItem,
                 incrementQty,
                 decrementQty,
                 removeItem,
-                addItem,
+                clearCart,
             }}
         >
             {children}
