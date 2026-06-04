@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { getProducts } from "@/services/product";
 import { getCategories } from "@/services/category";
 import ProductCard from "@/components/ui/ProductCard";
+import Pagination from "@/components/ui/Pagination";
 
 const DCatalogScreen = () => {
     const navigate = useNavigate();
@@ -17,11 +18,30 @@ const DCatalogScreen = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // paginate state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const limitPerPage = 8; // จำนวนสินค้าต่อหน้า
+
+    // always reset to page1 >> depend on เสิร์ช หรือ เปลี่ยนแคท
+    const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery);
+    if (searchQuery !== prevSearchQuery) {
+        setPrevSearchQuery(searchQuery);
+        setCurrentPage(1);
+    }
+
     const handleClearFilters = () => {
         setSelectedCategory("");
+        setCurrentPage(1);
         if (searchQuery) {
             navigate(location.pathname);
         }
+    };
+
+    const handleCategorySelect = (categoryId) => {
+        setSelectedCategory(categoryId);
+        setCurrentPage(1);
     };
 
     useEffect(() => {
@@ -41,11 +61,24 @@ const DCatalogScreen = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const response = await getProducts(
-                    searchQuery,
-                    selectedCategory,
-                );
+                // ส่ง params เป็น ovject ไปให้ service
+                const response = await getProducts({
+                    productname: searchQuery || undefined,
+                    categoryId: selectedCategory || undefined,
+                    page: currentPage,
+                    limit: limitPerPage,
+                });
+
                 setProductList(response.data || response || []);
+
+                // res.page from be
+                if (response.pagination) {
+                    setTotalPages(response.pagination.totalPages);
+                    setTotalItems(response.pagination.totalProducts);
+                } else {
+                    setTotalPages(1);
+                    setTotalItems(response.data?.length || 0); // เคส api ตอบกลับมาแบบไม่มี pagination
+                }
             } catch (err) {
                 console.error("Error fetching products:", err);
                 setError("ไม่สามารถโหลดข้อมูลสินค้าได้ในขณะนี้");
@@ -55,7 +88,9 @@ const DCatalogScreen = () => {
         };
 
         fetchProducts();
-    }, [searchQuery, selectedCategory]);
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [searchQuery, selectedCategory, currentPage]);
 
     const getActiveCategoryName = () => {
         if (searchQuery) return `ผลการค้นหา "${searchQuery}"`;
@@ -70,7 +105,7 @@ const DCatalogScreen = () => {
             <div className="sticky top-0 z-30 w-full bg-[#F8F6F2]/95 backdrop-blur-md border-b border-[#ddd6c8] shadow-sm">
                 <div className="w-full max-w-281.5 mx-auto px-4 md:px-8 py-3 flex flex-wrap justify-center gap-2 items-center">
                     <button
-                        onClick={() => setSelectedCategory("")}
+                        onClick={() => handleCategorySelect("")}
                         className={`shrink-0 px-3.5 py-1.5 md:px-6 md:py-2.5 rounded-lg text-[11px] md:text-sm font-bold transition-all border whitespace-nowrap ${
                             selectedCategory === ""
                                 ? "bg-[#5c8254] text-white border-[#5c8254] shadow-sm"
@@ -83,7 +118,7 @@ const DCatalogScreen = () => {
                     {categories.map((cat) => (
                         <button
                             key={cat._id}
-                            onClick={() => setSelectedCategory(cat._id)}
+                            onClick={() => handleCategorySelect(cat._id)}
                             className={`shrink-0 px-3.5 py-1.5 md:px-6 md:py-2.5 rounded-lg text-[11px] md:text-sm font-bold transition-all border whitespace-nowrap ${
                                 selectedCategory === cat._id
                                     ? "bg-[#5c8254] text-white border-[#5c8254] shadow-sm"
@@ -100,15 +135,18 @@ const DCatalogScreen = () => {
 
             {/* --- Main Content --- */}
 
-            <main className="w-full max-w-full mx-auto px-4 md:px-8 py-6 md:py-8">
+            <main className="w-full max-w-full mx-auto px-4 md:px-8 py-6 md:py-8 flex flex-col min-h-[70vh]">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 md:mb-8 gap-3 md:gap-4">
                     <div className="flex flex-wrap items-baseline gap-2 md:gap-3">
                         <h1 className="text-xl md:text-3xl font-black text-gray-800">
                             {getActiveCategoryName()}
                         </h1>
-                        <span className="text-sm md:text-base font-bold text-gray-400">
-                            {productList.length} เมนู
-                        </span>
+                        {/*  !isLoading not show */}
+                        {!isLoading && (
+                            <span className="text-sm md:text-base font-bold text-gray-400">
+                                {totalItems} เมนู
+                            </span>
+                        )}
 
                         {(searchQuery || selectedCategory !== "") && (
                             <button
@@ -127,9 +165,9 @@ const DCatalogScreen = () => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 grow">
                     {isLoading &&
-                        Array.from({ length: 8 }).map((_, idx) => (
+                        Array.from({ length: limitPerPage }).map((_, idx) => (
                             <div
                                 key={idx}
                                 className="bg-white p-4 md:p-5 rounded-xl border border-gray-100 shadow-sm animate-pulse flex flex-col h-full"
@@ -158,7 +196,7 @@ const DCatalogScreen = () => {
                 </div>
 
                 {!isLoading && !error && productList.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-20 md:py-32 bg-white/50 rounded-2xl border border-[#ddd6c8] border-dashed mt-6 md:mt-8">
+                    <div className="flex flex-col items-center justify-center py-20 md:py-32 bg-white/50 rounded-2xl border border-[#ddd6c8] border-dashed mt-6 md:mt-8 grow">
                         <span className="text-5xl md:text-6xl mb-4">🔍</span>
                         <h3 className="text-gray-800 font-bold text-lg md:text-xl mb-2 text-center">
                             ไม่พบสินค้าในหมวดหมู่นี้
@@ -173,6 +211,15 @@ const DCatalogScreen = () => {
                             ดูสินค้าทั้งหมด
                         </button>
                     </div>
+                )}
+
+                {/* pagination */}
+                {!isLoading && !error && productList.length > 0 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
                 )}
             </main>
         </div>

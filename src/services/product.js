@@ -1,13 +1,17 @@
 import { fetchApi } from "../utils/api";
 
-export const getProducts = async (searchQuery = "", categoryId = "") => {
-    const params = new URLSearchParams();
+export const getProducts = async (params = {}) => {
+    // กรองเอาเฉพาะข้อมูลที่มีค่าจริงๆ (ตัด undefined, null หรือ ค่าว่าง ทิ้งไป)
+    const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(
+            (entry) => entry[1] != null && entry[1] !== "",
+        ),
+    );
 
-    if (searchQuery) params.append("productname", searchQuery);
-    if (categoryId) params.append("categoryId", categoryId);
+    const queryString = new URLSearchParams(cleanParams).toString();
+    const endpoint = queryString ? `/products?${queryString}` : "/products";
 
-    const queryString = params.toString() ? `?${params.toString()}` : "";
-    return await fetchApi(`/products${queryString}`);
+    return await fetchApi(endpoint);
 };
 
 export const getProductById = async (id) => {

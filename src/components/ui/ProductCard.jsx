@@ -60,7 +60,7 @@ const ProductCard = ({ item, categories = [], onNavigate }) => {
 
                     <div className="flex flex-wrap gap-1.5 mb-4">
                         {item.kcal > 0 ? (
-                            <span className="bg-[#EAF2EA] text-[10px] font-bold text-[#5c8254] px-2 py-0.5 rounded-md uppercase">
+                            <span className="font-semibold bg-lime-50 text-xs text-lime-500 px-2 py-0.5 rounded-md">
                                 {item.kcal} kcal
                             </span>
                         ) : null}
@@ -68,24 +68,24 @@ const ProductCard = ({ item, categories = [], onNavigate }) => {
                         {item.protein &&
                         item.protein !== "0" &&
                         item.protein.toLowerCase() !== "0g" ? (
-                            <span className="bg-[#fcf8ef] text-[10px] font-bold text-[#d4a373] px-2 py-0.5 rounded-md uppercase">
-                                P {item.protein.replace(/g/i, "")}g
+                            <span className="font-semibold bg-rose-50 text-xs text-rose-500 px-2 py-0.5 rounded-md">
+                                Protein {item.protein.replace(/g/i, "")} g
                             </span>
                         ) : null}
 
                         {item.carbs &&
                         item.carbs !== "0" &&
                         item.carbs.toLowerCase() !== "0g" ? (
-                            <span className="bg-blue-50 text-[10px] font-bold text-blue-500 px-2 py-0.5 rounded-md uppercase">
-                                C {item.carbs.replace(/g/i, "")}g
+                            <span className="font-semibold bg-sky-50 text-xs text-sky-500 px-2 py-0.5 rounded-md">
+                                Carbs {item.carbs.replace(/g/i, "")} g
                             </span>
                         ) : null}
 
                         {item.fat &&
                         item.fat !== "0" &&
                         item.fat.toLowerCase() !== "0g" ? (
-                            <span className="bg-red-50 text-[10px] font-bold text-red-500 px-2 py-0.5 rounded-md uppercase">
-                                F {item.fat.replace(/g/i, "")}g
+                            <span className="font-semibold bg-orange-50 text-xs text-orange-300 px-2 py-0.5 rounded-md">
+                                Fat {item.fat.replace(/g/i, "")} g
                             </span>
                         ) : null}
                     </div>
@@ -93,9 +93,13 @@ const ProductCard = ({ item, categories = [], onNavigate }) => {
 
                 <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-50">
                     <span
-                        className={`text-xl font-black leading-none ${item.quantity === 0 ? "text-gray-400" : "text-gray-900"}`}
+                        className={`text-xs leading-none ${item.quantity === 0 ? "text-gray-400" : "text-gray-900"}`}
                     >
-                        ฿{item.price?.toLocaleString()}
+                        ราคา{" "}
+                        <span className="text-xl font-black leading-none">
+                            {item.price?.toLocaleString()}
+                        </span>{" "}
+                        บาท
                     </span>
 
                     {item.quantity === 0 ? (
