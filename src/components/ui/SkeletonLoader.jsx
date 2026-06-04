@@ -1,6 +1,6 @@
 const SkeletonLoader = () => {
     return (
-        <div className="min-h-screen font-sans bg-[f8f6f2] text-stone-800 flex flex-col w-full">
+        <div className="min-h-screen font-sans bg-[#f8f6f2] text-stone-800 flex flex-col w-full">
             {/* NavBar */}
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-8 py-3 border-b border-stone-200 bg-white">
                 <div className="flex items-center gap-4 md:gap-10">
