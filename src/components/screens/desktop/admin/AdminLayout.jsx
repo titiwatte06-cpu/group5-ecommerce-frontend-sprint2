@@ -42,15 +42,8 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        {/* Logout */}
-        <div className="px-4">
-          <button
-            onClick={() => navigate("/")}
-            className="w-full py-2.5 text-sm font-medium text-white bg-white/15 border border-white/30 rounded-lg cursor-pointer hover:bg-white/25 transition-colors"
-          >
-            Logout
-          </button>
-        </div>
+        
+        
       </aside>
 
       {/* Main content */}
